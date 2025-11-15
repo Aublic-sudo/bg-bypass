@@ -1,4 +1,4 @@
-name: Build C++ EXE (MSVC)
+name: Build C++ EXE (MSVC - Stable Method)
 
 on:
   workflow_dispatch:
@@ -10,23 +10,26 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout Repository
+    - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install Visual Studio Build Tools
+    - name: Install MSVC Build Tools (Direct VS Installer)
       run: |
-        choco install visualstudio2022buildtools --params "'/Add Microsoft.VisualStudio.Workload.VCTools /Quiet /NoRestart'" -y
+        curl -LO https://aka.ms/vs/17/release/vs_BuildTools.exe
+        .\vs_BuildTools.exe --quiet --wait --norestart ^
+          --add Microsoft.VisualStudio.Workload.VCTools ^
+          --add Microsoft.VisualStudio.Component.Windows10SDK.19041
 
-    - name: Add MSBuild to PATH
+    - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
     - name: Build Solution
-      run: msbuild "XC Bypass.sln" /p:Configuration=Release /p:Platform=x64
+      run: msbuild "sharmabypass.sln" /p:Configuration=Release /p:Platform=x64
 
-    - name: Upload Built EXE
+    - name: Upload EXE
       uses: actions/upload-artifact@v4
       with:
-        name: XC-Bypass-EXE
+        name: sharma-bypass-exe
         path: |
           **/x64/Release/*.exe
           **/Release/*.exe
