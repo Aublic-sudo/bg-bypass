@@ -2,27 +2,32 @@ name: Build Windows EXE
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: windows-latest
+
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout repo
+      uses: actions/checkout@v4
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1.1
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
 
-    - name: Setup Visual Studio
-      uses: microsoft/setup-msvc@v1
+    - name: Install Visual Studio Build Tools
+      uses: crazy-max/ghaction-chocolatey@v3
+      with:
+        args: install visualstudio2022buildtools --params "'/IncludeRecommended /Quiet /NoRestart'"
 
     - name: Build Solution
-      run: msbuild YourProject.sln /p:Configuration=Release /p:Platform=x64
+      run: msbuild "**/*.sln" /p:Configuration=Release /p:Platform=x64
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+    - name: Upload EXE Artifact
+      uses: actions/upload-artifact@v4
       with:
-        name: exe-file
+        name: built-exe
         path: |
+          **/x64/Release/*.exe
           **/Release/*.exe
