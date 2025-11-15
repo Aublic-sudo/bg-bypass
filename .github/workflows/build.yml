@@ -1,35 +1,15 @@
-name: Build C++ EXE (MSVC - Stable Method)
+name: Build C++
 
-on:
-  workflow_dispatch:
-  push:
-    branches: ["main"]
+on: [push]
 
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Install MSVC Build Tools (Direct VS Installer)
-      run: |
-        curl -LO https://aka.ms/vs/17/release/vs_BuildTools.exe
-        .\vs_BuildTools.exe --quiet --wait --norestart ^
-          --add Microsoft.VisualStudio.Workload.VCTools ^
-          --add Microsoft.VisualStudio.Component.Windows10SDK.19041
+    - uses: actions/checkout@v3
 
     - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@v1
 
     - name: Build Solution
-      run: msbuild "sharmabypass.sln" /p:Configuration=Release /p:Platform=x64
-
-    - name: Upload EXE
-      uses: actions/upload-artifact@v4
-      with:
-        name: sharma-bypass-exe
-        path: |
-          **/x64/Release/*.exe
-          **/Release/*.exe
+      run: msbuild sharmabypass.sln /p:Configuration=Release
