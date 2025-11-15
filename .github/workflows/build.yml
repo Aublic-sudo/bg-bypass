@@ -1,15 +1,21 @@
-name: Build C++
+name: Build C++ Tool
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
 
-    - name: Build Solution
-      run: msbuild sharmabypass.sln /p:Configuration=Release
+      - name: Retarget to supported SDK
+        run: |
+          sed -i "s/10.0.26100.0/10.0.22621.0/g" example.vcxproj
+
+      - name: Build x64 only
+        run: msbuild sharmabypass.sln /p:Configuration=Release /p:Platform=x64
