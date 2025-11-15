@@ -1,33 +1,25 @@
-name: Build Windows EXE
+name: Build EXE
 
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v3
 
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v2
+    - name: Install MinGW
+      run: choco install mingw -y
 
-    - name: Install Visual Studio Build Tools
-      uses: crazy-max/ghaction-chocolatey@v3
+    - name: Compile EXE
+      run: |
+        g++ source.cpp -o output.exe
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
       with:
-        args: install visualstudio2022buildtools --params "'/IncludeRecommended /Quiet /NoRestart'"
-
-    - name: Build Solution
-      run: msbuild "**/*.sln" /p:Configuration=Release /p:Platform=x64
-
-    - name: Upload EXE Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: built-exe
-        path: |
-          **/x64/Release/*.exe
-          **/Release/*.exe
+        name: exe-build
+        path: output.exe
