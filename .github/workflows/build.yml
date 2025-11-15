@@ -1,25 +1,32 @@
-name: Build EXE
+name: Build C++ EXE (MSVC)
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
     runs-on: windows-latest
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-    - name: Install MinGW
-      run: choco install mingw -y
-
-    - name: Compile EXE
+    - name: Install Visual Studio Build Tools
       run: |
-        g++ source.cpp -o output.exe
+        choco install visualstudio2022buildtools --params "'/Add Microsoft.VisualStudio.Workload.VCTools /Quiet /NoRestart'" -y
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Build Solution
+      run: msbuild "XC Bypass.sln" /p:Configuration=Release /p:Platform=x64
+
+    - name: Upload Built EXE
+      uses: actions/upload-artifact@v4
       with:
-        name: exe-build
-        path: output.exe
+        name: XC-Bypass-EXE
+        path: |
+          **/x64/Release/*.exe
+          **/Release/*.exe
